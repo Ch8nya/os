@@ -132,3 +132,149 @@ int main() {
 
     return 0;
 }
+
+
+// Round Robin:
+#include<stdio.h>
+int main()
+{
+//Input no of processed
+int n;
+printf("Enter Total Number of Processes:");
+scanf("%d", &n);
+int wait_time = 0, ta_time = 0, arr_time[n], burst_time[n], temp_burst_time[n];
+int x = n;
+//Input details of processes
+for(int i = 0; i < n; i++)
+{
+printf("Enter Details of Process %d \n", i + 1);
+printf("Arrival Time: ");
+scanf("%d", &arr_time[i]);
+printf("Burst Time: ");
+scanf("%d", &burst_time[i]);
+temp_burst_time[i] = burst_time[i];
+}
+//Input time slot
+int time_slot;
+printf("Enter Time Quantum:");
+scanf("%d", &time_slot);
+
+//Total indicates total time
+//counter indicates which process is executed
+int total = 0, counter = 0,i;
+printf("Process ID Burst Time Turnaround Time Waiting Time\n");
+for(total=0, i = 0; x!=0; )
+{
+// define the conditions
+if(temp_burst_time[i] <= time_slot && temp_burst_time[i] > 0)
+{
+total = total + temp_burst_time[i];
+temp_burst_time[i] = 0;
+counter=1;
+}
+else if(temp_burst_time[i] > 0)
+{
+temp_burst_time[i] = temp_burst_time[i] - time_slot;
+total += time_slot;
+}
+if(temp_burst_time[i]==0 && counter==1)
+{
+x--; //decrement the process no.
+printf("\nProcess No %d \t\t %d\t\t\t\t %d\t\t\t %d", i+1, burst_time[i],
+total-arr_time[i], total-arr_time[i]-burst_time[i]);
+wait_time = wait_time+total-arr_time[i]-burst_time[i];
+ta_time += total -arr_time[i];
+counter =0;
+}
+if(i==n-1)
+{
+i=0;
+}
+else if(arr_time[i+1]<=total)
+{
+i++;
+}
+else
+{
+i=0;
+}
+}
+
+float average_wait_time = wait_time * 1.0 / n;
+float average_turnaround_time = ta_time * 1.0 / n;
+printf("\nAverage Waiting Time:%f", average_wait_time);
+printf("\nAvg Turnaround Time:%f", average_turnaround_time);
+return 0;
+}
+
+//Priority
+#include<stdio.h>
+// Structure to represent a process
+struct Process {
+int process_id; // Process ID
+int priority; // Priority of the process
+int burst_time; // Burst time of the process
+};
+// Function to swap two processes
+void swap(struct Process *a, struct Process *b) {
+struct Process temp = *a;
+*a = *b;
+*b = temp;
+
+}
+// Function to perform Priority Scheduling
+void priorityScheduling(struct Process processes[], int n) {
+// Sort the processes based on priority (higher priority first)
+for (int i = 0; i < n - 1; i++) {
+for (int j = 0; j < n - i - 1; j++) {
+if (processes[j].priority > processes[j + 1].priority) {
+swap(&processes[j], &processes[j + 1]);
+}
+}
+}
+// Variables to store waiting time and turnaround time
+int waiting_time[n], turnaround_time[n];
+// Calculate waiting time and turnaround time for each process
+waiting_time[0] = 0;
+turnaround_time[0] = processes[0].burst_time;
+for (int i = 1; i < n; i++) {
+waiting_time[i] = waiting_time[i - 1] + processes[i - 1].burst_time;
+turnaround_time[i] = waiting_time[i] + processes[i].burst_time;
+}
+// Calculate total waiting time and turnaround time
+double total_waiting_time = 0, total_turnaround_time = 0;
+for (int i = 0; i < n; i++) {
+total_waiting_time += waiting_time[i];
+total_turnaround_time += turnaround_time[i];
+}
+// Print the details of each process
+printf("Process ID\tPriority\tBurst Time\tWaiting Time\tTurnaround Time\n");
+for (int i = 0; i < n; i++) {
+printf("%d\t\t%d\t\t%d\t\t%d\t\t%d\n", processes[i].process_id, processes[i].priority,
+processes[i].burst_time, waiting_time[i], turnaround_time[i]);
+}
+// Print average waiting time and average turnaround time
+
+printf("Average Waiting Time: %.2lf\n", total_waiting_time / n);
+printf("Average Turnaround Time: %.2lf\n", total_turnaround_time / n);
+}
+int main() {
+int n;
+printf("Enter the number of processes: ");
+scanf("%d", &n);
+// Declare an array of processes
+struct Process processes[n];
+// Input details of each process
+for (int i = 0; i < n; i++) {
+printf("Enter details for Process %d:\n", i + 1);
+printf("Process ID: ");
+scanf("%d", &processes[i].process_id);
+printf("Priority: ");
+scanf("%d", &processes[i].priority);
+printf("Burst Time: ");
+scanf("%d", &processes[i].burst_time);
+}
+// Perform Priority Scheduling
+priorityScheduling(processes, n);
+return 0;
+}
