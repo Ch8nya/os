@@ -132,3 +132,118 @@ int main() {
 
     return 0;
 }
+
+
+
+
+// SCAN
+ #include<bits/stdc++.h>
+using namespace std;
+void SCAN(int arr[],int head,string direction,int size, int disksize){
+  int seekcount =0;
+  int distance, cur_track;
+  vector<int> left,right;
+  vector<int> seeksequence;
+  if(direction=="left")left.push_back(0);
+  else if(direction=="right")right.push_back(disksize-1);
+
+  for(int i=0;i<size;i++){
+    if(arr[i]<head)left.push_back(arr[i]);
+    if(arr[i]>head)right.push_back(arr[i]);
+  }
+  sort(left.begin(),left.end());
+  sort(right.begin(),right.end());
+
+  int run=2;
+  while(run--){
+    if(direction=="left"){
+      for(int i=left.size()-1;i>=0;i--){
+        cur_track=left[i];
+        seeksequence.push_back(cur_track);
+        distance=abs(cur_track-head);
+        seekcount+=distance;
+        head=cur_track;
+      }
+      direction="right";
+    }
+    else if(direction=="right"){
+      for(int i=0;i<right.size();i++){
+        cur_track=right[i];
+        seeksequence.push_back(cur_track);
+        distance=abs(cur_track-head);
+        seekcount+=distance;
+        head=cur_track;
+      }
+      direction="left";
+    }
+  }
+  cout<<"Total number of seek operations = "<<seekcount<<"\n";
+  cout<<"Seek Sequence is: ";
+  for(int i=0;i<seeksequence.size();i++){
+    if(i==seeksequence.size()-1) cout<<seeksequence[i];
+    else cout<<seeksequence[i]<<"->";
+  }
+  
+  
+}
+int main(){
+  int size =7;
+  int disksize=200;
+  int arr[7]={16,24,43,82,140,170,190};
+  int head = 50;
+  string direction="right";
+  SCAN(arr,head,direction,size,disksize);
+  return 0;
+}
+
+// C Scan
+#include<bits/stdc++.h>
+using namespace std;
+void CSCAN(int arr[],int head,int size, int disksize){
+  int seekcount=0;
+  int distance,curtrack;
+  vector<int> left,right;
+  vector<int> seeksequence;
+
+  left.push_back(0);
+  right.push_back(disksize-1);
+
+  for(int i=0;i<size;i++){
+    if(arr[i]<head) left.push_back(arr[i]);
+    else if(arr[i]>head) right.push_back(arr[i]);
+  }
+  sort(left.begin(),left.end());
+  sort(right.begin(),right.end());
+
+  for(int i=0;i<right.size();i++){
+    curtrack=right[i];
+    seeksequence.push_back(curtrack);
+    distance=abs(curtrack-head);
+    seekcount+=distance;
+    head=curtrack;
+  }
+  head=0;
+  seekcount+=(disksize-1);
+  for(int i=0;i<left.size();i++){
+    curtrack=left[i];
+    seeksequence.push_back(curtrack);
+    distance=abs(curtrack-head);
+    seekcount+=distance;
+    head=curtrack;
+  }
+  cout<<"Total number of seek operations: "<<seekcount<<"\n";
+  cout<<"Seek Sequence is: "<<endl;
+  for(int i=0;i<seeksequence.size();i++){
+    if(i==seeksequence.size()-1) cout<<seeksequence[i]<<" ";
+    else cout<<seeksequence[i]<<"->";
+  }
+}
+int main(){
+  int size=8;
+  int disksize=200;
+  int arr[8] = {16,24,43,82,140,170,190,199};
+  int head=50;
+  cout<<"Initial position of head: "<<head<<endl;
+  CSCAN(arr,head,size,disksize);
+  return 0;
+}
