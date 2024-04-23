@@ -1,225 +1,155 @@
-//FCFS
 #include <iostream>
+#include <vector>
+#include <algorithm>
 #include <unordered_set>
 #include <queue>
-#include <sstream>
-#include <string>
-using namespace std;
-
-// Method to find page faults using FIFO
-int pageFaults(int pages[], int n, int capacity) 
-{
-    unordered_set<int> s;
-    queue<int> indexes;
-    int page_faults = 0;
-
-    for (int i = 0; i < n; i++)
-    {
-        if (s.size() < capacity)
-        {
-            if (s.find(pages[i]) == s.end())
-            {
-                s.insert(pages[i]);
-                page_faults++;
-                indexes.push(pages[i]);
-            }
-        }
-        else
-        {
-            if (s.find(pages[i]) == s.end())
-            {
-                int val = indexes.front();
-                indexes.pop();
-                s.erase(val);
-                s.insert(pages[i]);
-                indexes.push(pages[i]);
-                page_faults++;
-            }
-        }
-    }
-
-    return page_faults;
-}
-
-// Driver method
-int main()
-{
-    int capacity;
-    cout << "Enter the capacity: ";
-    cin >> capacity;
-    cin.ignore(); // Ignore the newline character after capacity input
-
-    string input;
-    cout << "Enter the pages (separated by space): ";
-    getline(cin, input);
-
-    // Parse the input string to get the page numbers
-    istringstream iss(input);
-    int pages[100];
-    int n = 0;
-    int page;
-    while (iss >> page)
-    {
-        pages[n++] = page;
-    }
-
-    cout << "Page Faults: " << pageFaults(pages, n, capacity) << endl;
-
-    return 0;
-}
-
-//LRU
-
-#include <iostream>
-#include <unordered_set>
 #include <unordered_map>
-#include <string>
-#include <sstream>
-#include <climits>
+
 using namespace std;
 
-// Method to find page faults using indexes
-int pageFaults(int pages[], int n, int capacity)
-{
-    unordered_set<int> s;
-    unordered_map<int, int> indexes;
-    int page_faults = 0;
+// Function to simulate First Come First Serve (FCFS) paging algorithm
+int FCFS(vector<int> &pages, int frameSize) {
+    unordered_set<int> s; 
+    queue<int> indexes; 
+    int n = pages.size();
+    int capacity = frameSize;
 
-    for (int i = 0; i < n; i++)
-    {
-        if (s.size() < capacity)
-        {
-            if (s.find(pages[i]) == s.end())
-            {
-                s.insert(pages[i]);
-                page_faults++;
-            }
-            indexes[pages[i]] = i;
-        }
-        else
-        {
-            if (s.find(pages[i]) == s.end())
-            {
-                int lru = INT_MAX, val = INT_MIN;
-                for (auto it = s.begin(); it != s.end(); it++)
-                {
-                    int temp = *it;
-                    if (indexes[temp] < lru)
-                    {
-                        lru = indexes[temp];
-                        val = temp;
-                    }
-                }
-                s.erase(val);
-                indexes.erase(val);
-                s.insert(pages[i]);
-                page_faults++;
-            }
-            indexes[pages[i]] = i;
-        }
-    }
-
+    int page_faults = 0; 
+    for (int i=0; i<n; i++) {
+        if (s.size() < capacity) { 
+            if (s.find(pages[i])==s.end()) { 
+                s.insert(pages[i]); 
+                page_faults++; 
+                indexes.push(pages[i]); 
+            } 
+        } else { 
+            if (s.find(pages[i]) == s.end()) { 
+                int val = indexes.front(); 
+                indexes.pop(); 
+                s.erase(val); 
+                s.insert(pages[i]); 
+                indexes.push(pages[i]); 
+                page_faults++; 
+            } 
+        } 
+    } 
+  
     return page_faults;
 }
 
-// Driver method
-int main()
-{
-    int capacity;
-    cout << "Enter the capacity: ";
-    cin >> capacity;
-    cin.ignore(); // Ignore the newline character
+// Function to simulate Least Recently Used (LRU) paging algorithm
+int LRU(vector<int> &pages, int frameSize) {
+    unordered_set<int> s; 
+    unordered_map<int, int> indexes; 
+    int n = pages.size();
+    int capacity = frameSize;
+  
+    int page_faults = 0; 
+    for (int i=0; i<n; i++) { 
+        if (s.size() < capacity) { 
+            if (s.find(pages[i])==s.end()) { 
+                s.insert(pages[i]); 
+                page_faults++; 
+            } 
+            indexes[pages[i]] = i; 
+        } else { 
+            if (s.find(pages[i]) == s.end()) { 
+                int lru = INT_MAX, val; 
+                for (auto it=s.begin(); it!=s.end(); it++) { 
+                    if (indexes[*it] < lru) { 
+                        lru = indexes[*it]; 
+                        val = *it; 
+                    } 
+                } 
+                s.erase(val); 
+                s.insert(pages[i]); 
+                page_faults++; 
+            } 
+            indexes[pages[i]] = i; 
+        } 
+    } 
+  
+    return page_faults;
+}
 
-    string input;
-    cout << "Enter the pages (separated by space): ";
-    getline(cin, input);
 
-    // Parse the input string to get the page numbers
-    istringstream iss(input);
-    int pages[100];
-    int n = 0;
-    int page;
-    while (iss >> page)
-    {
-        pages[n++] = page;
+int optimal(vector<int> &pg, int fn) {
+    int pn = (int)pg.size();
+    vector<int>fr(fn,-1);
+    int hit = 0;
+    for (int i = 0; i < pn; i++) {
+        bool found = false;
+        for (int j = 0; j < fn; j++) {
+            if (fr[j] == pg[i]) {
+                hit++;
+                found = true;
+                break;
+            }
+        }
+ 
+        if (found)
+            continue;
+        bool emptyFrame = false;
+        for (int j = 0; j < fn; j++) {
+            if (fr[j] == -1) {
+                fr[j] = pg[i];
+                emptyFrame = true;
+                break;
+            }
+        }
+ 
+        if (emptyFrame)
+            continue;
+
+        int farthest = -1, replaceIndex = -1;
+        for (int j = 0; j < fn; j++) {
+            int k;
+            for (k = i + 1; k < pn; k++) {
+                if (fr[j] == pg[k]) {
+                    if (k > farthest) {
+                        farthest = k;
+                        replaceIndex = j;
+                    }
+                    break;
+                }
+            }
+            if (k == pn) {
+                replaceIndex = j;
+                break;
+            }
+        }
+        fr[replaceIndex] = pg[i];
     }
+    cout << "No. of hits = " << hit << endl;
+    cout << "No. of misses = " << pn - hit << endl;
+    return pn-hit;
+}
 
-    cout << "Page Faults: " << pageFaults(pages, n, capacity) << endl;
+int main() {
+    int frameSize, n;
+    cout << "Enter number of frames: ";
+    cin >> frameSize;
+    cout << "Enter number of pages: ";
+    cin >> n;
+    vector<int> pages(n);
+    cout << "Enter page references: ";
+    for (int i = 0; i < n; i++)
+        cin >> pages[i];
+
+    cout << "\nFCFS Page Replacement Algorithm:\n";
+    cout << "Number of page faults: " << FCFS(pages, frameSize) << endl;
+
+    cout << "\nLRU Page Replacement Algorithm:\n";
+    cout << "Number of page faults: " << LRU(pages, frameSize) << endl;
+
+    cout << "\nOptimal Page Replacement Algorithm:\n";
+    cout << "Number of page faults: " << optimal(pages, frameSize) << endl;
 
     return 0;
 }
 
-//Optimal
-#include <iostream>
-using namespace std;
-int main() {
-int flag1, flag2, flag3, i, j, k, position, max, faults = 0;
-int num_frames = 4;
-int frames[num_frames];
-int temp[num_frames];
-int inputStream[] = {7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2, 1, 2, 0, 1, 7, 0, 1};
-int num_pages = sizeof(inputStream) / sizeof(inputStream[0]);
-for(i = 0; i < num_frames; i++) {
-
-frames[i] = -1;
-}
-for(i = 0; i < num_pages; i++) {
-flag1 = flag2 = 0;
-for(j = 0; j < num_frames; j++) {
-if(frames[j] == inputStream[i]) {
-flag1 = flag2 = 1;
-break;
-}
-}
-if(flag1 == 0) {
-for(j = 0; j < num_frames; j++) {
-if(frames[j] == -1) {
-faults++;
-frames[j] = inputStream[i];
-flag2 = 1;
-break;
-}
-}
-}
-if(flag2 == 0) {
-flag3 = 0;
-for(j = 0; j < num_frames; j++) {
-temp[j] = -1;
-for(k = i + 1; k < num_pages; k++) {
-if(frames[j] == inputStream[k]) {
-temp[j] = k;
-break;
-}
-}
-}
-for(j = 0; j < num_frames; j++) {
-if(temp[j] == -1) {
-position = j;
-flag3 = 1;
-break;
-}
-}
-if(flag3 == 0) {
-max = temp[0];
-position = 0;
-
-for(j = 1; j < num_frames; j++) {
-if(temp[j] > max) {
-max = temp[j];
-position = j;
-}
-}
-}
-frames[position] = inputStream[i];
-faults++;
-}
-cout << endl;
-for(j = 0; j < num_frames; j++) {
-cout << frames[j] << "\t";
-}
-}
-cout << endl << endl;
-cout << "Total Page Faults = " << faults << endl;
-cout << "Total Hits = " << num_pages - faults << endl;
-return 0;
-}
+/*
+4
+13
+7 0 1 2 0 3 0 4 2 3 0 3 2
+*/

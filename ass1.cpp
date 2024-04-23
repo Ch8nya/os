@@ -1,68 +1,44 @@
-#include<stdio.h>
-#include<stdlib.h>
+#include <bits/stdc++.h>
 #include<unistd.h>
-#include<sys/wait.h>
+//need to add sys/wait.h 
+#include <sys/wait.h>
+using namespace std;
 
-void copyfile() {
-    pid_t child_pid = fork();
+int main(int count, char *argv[]) {
+    // Fork a new process
+    pid_t p = fork();
 
-    if (child_pid < 0) {
-        printf("Fork Failed\n");
-    } else if (child_pid == 0) {
-        char *args[] = {"cp", "source.txt", "dest.txt", NULL};
-        execvp("cp", args);
-        perror("execvp");
-        exit(EXIT_FAILURE);
-    } else {
-        wait(NULL);
-        printf("file copied successfully\n");
+
+    if (p < 0) {
+        cout << "Fork Unsuccessful\n";
+        exit(0);
+    } else if (p == 0) {
+        
+        string option = argv[1];
+
+        if (option == "cp") {
+            
+            execlp("/bin/cp", "cp", argv[2], argv[3], NULL);
+        } else if (option == "ls") {
+           
+            execlp("/bin/ls", "ls", NULL);
+        } else if (option == "grep") {
+           
+            execlp("/bin/grep", "grep", argv[2], argv[3], argv[4], NULL);
+        }
     }
-}
 
-void searchpattern() {
-    char pattern[256];
-    printf("enter the pattern to search :: ");
-    scanf("%255s", pattern);
-
-    pid_t child_pid = fork();
-    if (child_pid < 0) {
-        printf("Fork Failded\n");
-    } else if (child_pid == 0) {
-        char *args[] = {"grep", pattern, "source.txt", NULL};
-        execvp("grep", args);
-        perror("execvp");
-        exit(EXIT_FAILURE);
-    } else {
-        wait(NULL);
-        printf("pattern search completed \n");
-    }
-}
-
-int main() {
-    int ch;
-    printf("\n Choose option to execute : \n");
-    printf("1. Copy file(cp command)\n");
-    printf("2. search pattern(grep command)\n");
-    printf("3. Display process ID (getpid)\n");
-    printf("4. exit\n");
-    scanf("%d", &ch);
-
-    switch (ch) {
-        case 1:
-            copyfile();
-            break;
-        case 2:
-            searchpattern();
-            break;
-        case 3:
-            printf("Process ID is :: %d", getpid());
-            break;
-        case 4:
-            printf("==exiting program==\n");
-            exit(EXIT_SUCCESS);
-        default:
-            printf("invalid input");
-    }
+    cout << "Parent Process ID: " << getpid() << endl;
+    cout << "Child Process ID: " << p << endl;
+   
+    waitpid(p, NULL, 0); 
+    cout << "Child process completed\n";
 
     return 0;
 }
+
+//touch code.cpp {it creates the new code.cpp file}
+// g++ assignment_name.cpp
+// ./a.out ls
+// ./a.out cp source.txt destinatio.txt
+// ./a.out grep -i(it ignore upper and lower case) text(to search) file_name.txt

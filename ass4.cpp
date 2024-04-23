@@ -8,7 +8,7 @@ sem_t mut,db;
 pthread_t reader[100],writer[100];
 int rc = 0;
 
-void read1(void param){
+void *read1(void* param){
     sem_wait(&mut);
     rc++;
     if(rc==1){
@@ -26,10 +26,10 @@ void read1(void param){
     return NULL;
 }
 
-void write1(void param){
+void *write1(void* param){
     printf("Writer is trying to enter\n");
     sem_wait(&db);
-    usleep(10);
+    usleep(100);
     printf("Writer has entered\n");
     sem_post(&db);
     printf("Writer is leaving\n");
